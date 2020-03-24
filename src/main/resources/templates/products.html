@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Склад</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <th:block th:replace="navbar :: bootstrap">...</th:block>
+</head>
+<body>
+<th:block th:replace="navbar :: header">...</th:block>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'productIdCategory,ASC'})}"
+               th:unless="${currentSort == 'productIdCategory,DESC' || currentSort == 'productIdCategory,ASC'}">Категория</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'productIdCategory,ASC'})}"
+               th:if="${currentSort == 'productIdCategory,DESC'}">Категория▼</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'productIdCategory,DESC'})}"
+               th:if="${currentSort == 'productIdCategory,ASC'}">Категория▲</a>
+        </th>
+        <th scope="col">Изображение</th>
+        <th scope="col">
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'productIdName,ASC'})}"
+               th:unless="${currentSort == 'productIdName,DESC' || currentSort == 'productIdName,ASC'}">Название</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'productIdName,ASC'})}"
+               th:if="${currentSort == 'productIdName,DESC'}">Название▼</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'productIdName,DESC'})}"
+               th:if="${currentSort == 'productIdName,ASC'}">Название▲</a>
+        </th>
+        <th scope="col">Описание</th>
+        <th scope="col">
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'price,ASC'})}"
+               th:unless="${currentSort == 'price,DESC' || currentSort == 'price,ASC'}">Цена</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'price,ASC'})}"
+               th:if="${currentSort == 'price,DESC'}">Цена▼</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'price,DESC'})}"
+               th:if="${currentSort == 'price,ASC'}">Цена▲</a>
+        </th>
+        <th scope="col">
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'amount,ASC'})}"
+               th:unless="${currentSort == 'amount,DESC' || currentSort == 'amount,ASC'}">Количество
+                на складе</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'amount,ASC'})}"
+               th:if="${currentSort == 'amount,DESC'}">Количество
+                на складе▼</a>
+            <a th:href="@{/products(category=${categoryParameter},page=${currentPage},size=${pageSize}, sort=${'amount,DESC'})}"
+               th:if="${currentSort == 'amount,ASC'}">Количество
+                на складе▲</a>
+        </th>
+        <th:block th:if="${regularUser} == null">
+            <th scope="col">Действия</th>
+        </th:block>
+    </tr>
+    </thead>
+    <tr th:each="product : ${products}">
+        <td th:text="${product.category}">product category</td>
+        <td th:switch="${product.image != null}">
+            <img class="img-thumbnail"
+                 height="100" src=""
+                 th:case="true" th:src="${imagePrefix + product.image + '.jpg'}"
+                 th:width="100"/>
+            <p th:case="false">Нет</p>
+        </td>
+        <td th:text="${product.name}">product name</td>
+        <td th:text="${product.description}">product desc</td>
+        <td th:text="${product.price}">product price</td>
+        <td th:text="${product.amount}">product amount</td>
+        <td th:if="${regularUser} == null">
+            <form method="get" th:action="@{/editProduct}">
+                <input name="name" th:value="${product.name}" type="hidden">
+                <input name="category" th:value="${product.category}" type="hidden">
+                <button class="btn btn-primary" name="edit" type="submit">Редактировать</button>
+                <button class="btn btn-danger" name="remove" onclick="return confirm('Вы уверены?');" type="submit">
+                    Удалить
+                </button>
+            </form>
+        </td>
+    </tr>
+</table>
+<div class="container justify-content-start">
+    <form method="get" th:action="@{/editProduct}" th:if="${regularUser} == null">
+        <input name="category" th:value="${categoryParameter}" type="hidden"/>
+        <button class="btn btn-success" name="edit" type="submit">Добавить</button>
+    </form>
+    <form method="get">
+        <input name="category" th:value="${categoryParameter}" type="hidden">
+        <label th:fragment="selectpages">
+            На странице:
+            <select class="custom-select" name="size" onchange="this.form.submit()" style="width: auto;">
+                <option th:text="${pageSize}">pageSize</option>
+                <th:block th:each="value : ${#numbers.sequence(1,4)}">
+                    <option th:if="${value * 10 != pageSize}" th:text="${value*10}"></option>
+                </th:block>
+            </select>
+        </label>
+    </form>
+</div>
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <th:block th:each="i : ${#numbers.sequence(1, products.getTotalPages())}">
+            <li th:class="${currentPage == i - 1}? 'page-product active' : 'page-product'">
+                <a class="page-link"
+                   th:href="@{/products(category=${categoryParameter},page=${i-1},size=${pageSize}, sort=${currentSort})}"
+                   th:text="${i}"></a>
+            </li>
+        </th:block>
+    </ul>
+</nav>
+</body>
+</html>
