@@ -78,9 +78,6 @@ public class ProductController {
     public String addOrEditProduct(@ModelAttribute Product product,
                                    BindingResult bindingResult,
                                    @RequestParam(value = "image", required = false) MultipartFile image) throws UnsupportedEncodingException {
-        if (bindingResult.hasErrors()) {
-            return "/editProduct";
-        }
         try {
             if (!image.isEmpty()) {
                 validateImage(image);
