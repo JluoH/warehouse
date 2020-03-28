@@ -37,7 +37,7 @@ public class Category {
 
     public String getAbbreviatedDescription() {
         if (description != null && description.length() > 150) {
-            return description.substring(0, 150);
+            return description.substring(0, 150) + "...";
         }
         return description;
     }

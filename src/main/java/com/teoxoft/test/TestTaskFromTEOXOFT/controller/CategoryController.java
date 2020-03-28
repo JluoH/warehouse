@@ -41,32 +41,33 @@ public class CategoryController {
     public String addCategory(Model model) {
         model.addAttribute("addCategory", true);
         model.addAttribute("categoryList", categoryService.getAllCategories());
-        model.addAttribute("category", new Category());
+        model.addAttribute("newCategory", new Category());
+        return "categories";
+    }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping(value = "/categories", params = "edit")
+    public String editCategory(Model model,
+                               @RequestParam("edit") String editableCategory) {
+        model.addAttribute("editableCategory", editableCategory);
+        model.addAttribute("categoryList", categoryService.getAllCategories());
+        model.addAttribute("newCategory", new Category());
         return "categories";
     }
 
     @Secured("ROLE_ADMIN")
     @PostMapping("/categories")
     public String addOrEditCategory(@RequestParam(value = "edit", required = false) String editableCategory,
-                                    @ModelAttribute Category category,
+                                    @ModelAttribute Category newCategory,
                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "categories";
         }
         if (editableCategory != null && !editableCategory.isEmpty()) {
-            category.setName(editableCategory);
+            categoryService.updateCategoryName(newCategory.getName(), editableCategory);
         }
-        categoryService.addCategory(category);
+        categoryService.addCategory(newCategory);
         return "redirect:/categories";
-    }
-
-    @Secured("ROLE_ADMIN")
-    @GetMapping(value = "/categories", params = "edit")
-    public String editCategory(Model model, @RequestParam("edit") String editableCategory) {
-        model.addAttribute("editableCategory", editableCategory);
-        model.addAttribute("categoryList", categoryService.getAllCategories());
-        model.addAttribute("category", new Category());
-        return "categories";
     }
 
     @Secured("ROLE_ADMIN")

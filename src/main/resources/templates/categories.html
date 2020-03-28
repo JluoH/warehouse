@@ -21,35 +21,53 @@
 
     <th:block th:each="category : ${categoryList}">
         <tr>
-            <td><a th:href="${'products?category=' + category.name}" th:text="${category.name}">link to category</a>
-            </td>
-            <td th:text="${category.countOfProducts}">count of products</td>
+            <!--Формы ввода-->
             <td th:if="${editableCategory} == ${category.getName()}">
-                <form method="post" th:object="${category}">
-                    <textarea class="form-control" th:field="*{description}"
-                              th:text="${category.getDescription()}"></textarea>
-                    <button class="btn btn-success" style="float:right" type="submit">Обновить</button>
+                <form method="post" th:object="${newCategory}">
+                    <input class="form-control" name="name" th:value="${category.name}"/>
+                    Описание:<textarea class="form-control" name="description"
+                              th:text="${category.description}"></textarea>
+                    <button class="btn btn-success" style="float:left" type="submit">Обновить</button>
                 </form>
             </td>
+            <!--__________________________________-->
 
-            <td th:text="${category.getAbbreviatedDescription()}"
-                th:unless="${editableCategory} == ${category.getName()}">description of category
+            <!--Ссылка на категорию (если это не изменяемая категория)-->
+            <td th:unless="${editableCategory} == ${category.getName()}">
+                <a th:href="${'products?category=' + category.name}" th:text="${category.name}"></a>
             </td>
+            <!--__________________________________-->
+
+            <!--Кол-во видов продуктов в категории-->
+            <td th:text="${category.countOfProducts}"></td>
+            <!--__________________________________-->
+
+            <!--Описание категории (если это не изменяемая категория)-->
+            <td th:text="${category.getAbbreviatedDescription()}"
+                th:unless="${editableCategory} == ${category.getName()}"></td>
+            <!--__________________________________-->
+
+            <!--Пустой столбец для изменяемой категории-->
+            <td th:if="${editableCategory} == ${category.getName()}">
+            </td>
+            <!--__________________________________-->
+
+            <!--Редактировать и удалить-->
             <td th:if="${regularUser} == null">
                 <form method="get">
                     <button class="btn btn-primary" name="edit" th:value="${category.name}" type="submit">
                         Редактировать
                     </button>
+
                     <button class="btn btn-danger" name="remove" onclick="return confirm('Вы уверены?');"
                             th:value="${category.name}"
                             type="submit">Удалить
                     </button>
                 </form>
             </td>
-
+            <!--__________________________________-->
         </tr>
     </th:block>
-
 </table>
 
 <div class="container" id="bottomContainer">
@@ -61,7 +79,7 @@
     </th:block>
 
     <th:block th:if="${addCategory} == true">
-        <form action="#" method="post" th:action="@{/categories}" th:object="${category}">
+        <form action="#" method="post" th:action="@{/categories}" th:object="${newCategory}">
             <a class="btn btn-outline-secondary" href="/categories#bottomContainer">Скрыть</a>
             <div class="container">
                 <p>

@@ -14,6 +14,11 @@ public class CategoryService {
     @Autowired
     private ProductService productService;
 
+    public void updateCategoryName(String newName, String oldName) {
+
+        categoryRepository.updateCategoryName(newName, oldName);
+    }
+
     public void addCategory(Category category) {
         categoryRepository.save(category);
     }
@@ -28,5 +33,4 @@ public class CategoryService {
                 category.setCountOfProducts(productService.getAmountOfProductsInCategory(category.getName())));
         return categoryList;
     }
-
 }
