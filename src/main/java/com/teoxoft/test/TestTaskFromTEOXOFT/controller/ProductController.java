@@ -13,6 +13,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,7 +36,7 @@ public class ProductController {
     private String pathToImages;
 
     @GetMapping("/products")
-    public String products(Model model,
+    public String products(ModelMap modelMap,
                            @RequestParam(value = "category", required = false) String category,
                            @RequestParam(value = "sort", required = false) String sort,
                            @PageableDefault Pageable pageable) {
@@ -45,30 +46,30 @@ public class ProductController {
         } else {
             products = productService.getAllProductsInCategoryAsPage(category, pageable);
         }
-        model.addAttribute("products", products);
-        model.addAttribute("imagePrefix", pathToImages);
-        model.addAttribute("categoryParameter", category);
-        model.addAttribute("currentPage", pageable.getPageNumber());
-        model.addAttribute("currentSort", sort);
-        model.addAttribute("pageSize", products.getSize());
+        modelMap.addAttribute("products", products);
+        modelMap.addAttribute("imagePrefix", pathToImages);
+        modelMap.addAttribute("categoryParameter", category);
+        modelMap.addAttribute("currentPage", pageable.getPageNumber());
+        modelMap.addAttribute("currentSort", sort);
+        modelMap.addAttribute("pageSize", products.getSize());
         if (((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getRole().equals(USER))
-            model.addAttribute("regularUser", true);
+            modelMap.addAttribute("regularUser", true);
         return "products";
     }
 
     @Secured("ROLE_ADMIN")
     @GetMapping(value = "/editProduct", params = "edit")
-    public String editProduct(Model model,
+    public String editProduct(ModelMap modelMap,
                               @RequestParam(value = "category", required = false) String category,
                               @RequestParam(value = "name", required = false) String name) {
         if ((category == null || category.isEmpty()) && (name == null || name.isEmpty())) {
-            model.addAttribute("product", new Product());
+            modelMap.addAttribute("product", new Product());
         } else if ((category != null && !category.isEmpty()) && (name == null || name.isEmpty())) {
             Product product = new Product();
             product.setCategory(category);
-            model.addAttribute("product", product);
+            modelMap.addAttribute("product", product);
         } else {
-            model.addAttribute("product", productService.getProductByCategoryAndName(category, name));
+            modelMap.addAttribute("product", productService.getProductByCategoryAndName(category, name));
         }
         return "editProduct";
     }

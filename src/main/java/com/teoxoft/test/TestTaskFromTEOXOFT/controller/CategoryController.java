@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -20,6 +20,7 @@ import static com.teoxoft.test.TestTaskFromTEOXOFT.entity.Role.USER;
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
+    private boolean isDuplicateCategory = false;
 
     @GetMapping
     public String categories() {
@@ -27,31 +28,35 @@ public class CategoryController {
     }
 
     @GetMapping("/categories")
-    public String categories(Model model) {
-        model.addAttribute("categoryList", categoryService.getAllCategories());
-        model.addAttribute("addCategory", false);
+    public String categories(ModelMap modelMap) {
+        modelMap.addAttribute("categoryList", categoryService.getAllCategories());
+        modelMap.addAttribute("addCategory", false);
         if (((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getRole().equals(USER)) {
-            model.addAttribute("regularUser", true);
+            modelMap.addAttribute("isRegularUser", true);
+        }
+        if (isDuplicateCategory) {
+            isDuplicateCategory = false;
+            modelMap.addAttribute("isDuplicateCategory", true);
         }
         return "categories";
     }
 
     @Secured("ROLE_ADMIN")
     @GetMapping(value = "/categories", params = "addCategory")
-    public String addCategory(Model model) {
-        model.addAttribute("addCategory", true);
-        model.addAttribute("categoryList", categoryService.getAllCategories());
-        model.addAttribute("newCategory", new Category());
+    public String addCategory(ModelMap modelMap) {
+        modelMap.addAttribute("addCategory", true);
+        modelMap.addAttribute("categoryList", categoryService.getAllCategories());
+        modelMap.addAttribute("newCategory", new Category());
         return "categories";
     }
 
     @Secured("ROLE_ADMIN")
     @GetMapping(value = "/categories", params = "edit")
-    public String editCategory(Model model,
+    public String editCategory(ModelMap modelMap,
                                @RequestParam("edit") String editableCategory) {
-        model.addAttribute("editableCategory", editableCategory);
-        model.addAttribute("categoryList", categoryService.getAllCategories());
-        model.addAttribute("newCategory", new Category());
+        modelMap.addAttribute("editableCategory", editableCategory);
+        modelMap.addAttribute("categoryList", categoryService.getAllCategories());
+        modelMap.addAttribute("newCategory", new Category());
         return "categories";
     }
 
@@ -60,13 +65,16 @@ public class CategoryController {
     public String addOrEditCategory(@RequestParam(value = "edit", required = false) String editableCategory,
                                     @ModelAttribute Category newCategory,
                                     BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "categories";
+        if (!bindingResult.hasErrors()) {
+            if (categoryService.getCategoryByName(newCategory.getName()) != null) {
+                isDuplicateCategory = true;
+            } else {
+                if (editableCategory != null && !editableCategory.isEmpty()) {
+                    categoryService.updateCategoryName(newCategory.getName(), editableCategory);
+                }
+                categoryService.addCategory(newCategory);
+            }
         }
-        if (editableCategory != null && !editableCategory.isEmpty()) {
-            categoryService.updateCategoryName(newCategory.getName(), editableCategory);
-        }
-        categoryService.addCategory(newCategory);
         return "redirect:/categories";
     }
 

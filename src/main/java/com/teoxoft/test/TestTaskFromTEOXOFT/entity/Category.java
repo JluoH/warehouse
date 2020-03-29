@@ -24,7 +24,12 @@ public class Category {
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (!name.isBlank()) {
+            this.name = name;
+        }
+        else {
+            throw new RuntimeException("Название категории не может быть пустым или содержать одни пробелы");
+        }
     }
 
     public String getDescription() {

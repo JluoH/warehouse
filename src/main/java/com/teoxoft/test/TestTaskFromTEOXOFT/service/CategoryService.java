@@ -33,4 +33,10 @@ public class CategoryService {
                 category.setCountOfProducts(productService.getAmountOfProductsInCategory(category.getName())));
         return categoryList;
     }
+    public Category getCategoryByName(String name) {
+        if (categoryRepository.findById(name).isEmpty()){
+            return null;
+        }
+        return categoryRepository.findById(name).get();
+    }
 }

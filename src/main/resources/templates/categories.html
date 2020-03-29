@@ -13,7 +13,7 @@
         <th scope="col">Название</th>
         <th scope="col">Кол-во товаров</th>
         <th scope="col">Описание</th>
-        <th:block th:if="${regularUser} == null">
+        <th:block th:if="${isRegularUser} == null">
             <th scope="col">Действия</th>
         </th:block>
     </tr>
@@ -26,7 +26,7 @@
                 <form method="post" th:object="${newCategory}">
                     <input class="form-control" name="name" th:value="${category.name}"/>
                     Описание:<textarea class="form-control" name="description"
-                              th:text="${category.description}"></textarea>
+                                       th:text="${category.description}"></textarea>
                     <button class="btn btn-success" style="float:left" type="submit">Обновить</button>
                 </form>
             </td>
@@ -53,7 +53,7 @@
             <!--__________________________________-->
 
             <!--Редактировать и удалить-->
-            <td th:if="${regularUser} == null">
+            <td th:if="${isRegularUser} == null">
                 <form method="get">
                     <button class="btn btn-primary" name="edit" th:value="${category.name}" type="submit">
                         Редактировать
@@ -72,10 +72,14 @@
 
 <div class="container" id="bottomContainer">
 
-    <th:block th:if="${regularUser} == null" th:unless="${addCategory}">
+    <th:block th:if="${isRegularUser} == null" th:unless="${addCategory}">
         <form action="#bottomContainer" method="get">
             <button class="btn btn-success" name="addCategory" type="submit">Добавить новую категорию</button>
         </form>
+    </th:block>
+
+    <th:block th:if="${isDuplicateCategory} != null">
+        <div class="alert alert-danger" role="alert">Категория с таким названием уже существует</div>
     </th:block>
 
     <th:block th:if="${addCategory} == true">
