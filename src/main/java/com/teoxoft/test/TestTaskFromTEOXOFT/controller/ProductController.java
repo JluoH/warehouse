@@ -12,7 +12,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,11 +36,11 @@ public class ProductController {
 
     @GetMapping("/products")
     public String products(ModelMap modelMap,
-                           @RequestParam(value = "category", required = false) String category,
-                           @RequestParam(value = "sort", required = false) String sort,
+                           @RequestParam(value = "category", defaultValue = "") String category,
+                           @RequestParam(value = "sort", defaultValue = "") String sort,
                            @PageableDefault Pageable pageable) {
         Page<Product> products;
-        if (category == null || category.isEmpty()) {
+        if (category.isEmpty()) {
             products = productService.getAllProductsAsPage(pageable);
         } else {
             products = productService.getAllProductsInCategoryAsPage(category, pageable);
@@ -60,11 +59,11 @@ public class ProductController {
     @Secured("ROLE_ADMIN")
     @GetMapping(value = "/editProduct", params = "edit")
     public String editProduct(ModelMap modelMap,
-                              @RequestParam(value = "category", required = false) String category,
-                              @RequestParam(value = "name", required = false) String name) {
-        if ((category == null || category.isEmpty()) && (name == null || name.isEmpty())) {
+                              @RequestParam(value = "name", defaultValue = "") String name,
+                              @RequestParam(value = "category", defaultValue = "") String category) {
+        if (category.isEmpty() && name.isEmpty()) {
             modelMap.addAttribute("product", new Product());
-        } else if ((category != null && !category.isEmpty()) && (name == null || name.isEmpty())) {
+        } else if (!category.isEmpty() && name.isEmpty()) {
             Product product = new Product();
             product.setCategory(category);
             modelMap.addAttribute("product", product);
@@ -79,24 +78,32 @@ public class ProductController {
     public String addOrEditProduct(@ModelAttribute Product product,
                                    BindingResult bindingResult,
                                    @RequestParam(value = "image", required = false) MultipartFile image) throws UnsupportedEncodingException {
-        try {
-            if (!image.isEmpty()) {
-                validateImage(image);
-                saveImage(product.getCategory() + product.getName() + ".jpg", image);
-                product.setImage(product.getCategory() + product.getName());
-            }
-        } catch (RuntimeException e) {
-            bindingResult.reject(e.getMessage());
-            return "editProduct";
+        String[] categories = product.getCategory().split(",");
+        String[] products = product.getName().split(",");
+        String newCategory = categories[0];
+        String newProduct = products[0];
+        String oldCategory = "";
+        product.setCategory(newCategory);
+        if (categories.length > 1) {
+            oldCategory = categories[1];
+        }
+        String oldProduct = "";
+        if (products.length > 1) {
+            product.setName(newProduct);
+            oldProduct = products[1];
+        }
+        if (!oldProduct.isEmpty() && !oldCategory.isEmpty()
+                && (!oldCategory.equals(newCategory) || !oldProduct.equals(newProduct))) {
+            productService.updateCategoryAndNameOfProduct(newCategory, oldCategory, newProduct, oldProduct);
         }
         productService.addProduct(product);
-        return "redirect:/products?category=" + URLEncoder.encode(product.getCategory(), "UTF-8");
+        return "redirect:/products?category=" + URLEncoder.encode(newCategory, "UTF-8");
     }
 
     @Secured("ROLE_ADMIN")
-    @GetMapping(value = "/editProduct", params = {"remove", "category", "name"})
-    public String removeProduct(@RequestParam("category") String category,
-                                @RequestParam("name") String name) throws UnsupportedEncodingException {
+    @GetMapping(value = "/editProduct", params = {"remove", "name", "category"})
+    public String removeProduct(@RequestParam("name") String name,
+                                @RequestParam("category") String category) throws UnsupportedEncodingException {
         productService.removeProduct(productService.getProductByCategoryAndName(category, name));
         return "redirect:/products?category=" + URLEncoder.encode(category, "UTF-8");
     }

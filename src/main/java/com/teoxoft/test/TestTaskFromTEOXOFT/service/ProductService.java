@@ -21,6 +21,10 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    public void updateCategoryAndNameOfProduct(String newCategory, String oldCategory, String newName, String oldName) {
+        productRepository.updateCategoryAndNameOfProduct(newCategory, oldCategory, newName, oldName);
+    }
+
     public int getAmountOfProductsInCategory(String categoryName) {
         return productRepository.countByProductIdCategory(categoryName);
     }

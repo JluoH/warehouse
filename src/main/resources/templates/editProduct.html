@@ -9,19 +9,18 @@
 <th:block th:replace="navbar :: header">...</th:block>
 
 <div class="container">
-    <form action="#" enctype="multipart/form-data" method="post" th:action="@{/editProduct}" th:object="${product}">
-        Категория: <input class="form-control" th:field="*{category}" th:value="*{getCategory()}" type="text"/> <br>
-        Название: <input class="form-control" th:field="*{name}" th:value="*{getName()}" type="text"/> <br>
-        Описание: <textarea class="form-control" th:field="*{description}" th:text="*{description}"></textarea> <br>
-        Цена: <input class="form-control" step="0.1" th:field="*{price}" th:value="*{price}" type="number"/> <br>
-        Количество: <input class="form-control" th:field="*{amount}" th:value="*{amount}" type="number"/> <br>
+    <form enctype="multipart/form-data" method="post" th:object="${product}">
+        Категория: <input class="form-control" name="category" th:value="*{category}" type="text"/> <br>
+        Название: <input class="form-control" name="name" th:value="*{name}" type="text"/> <br>
+        Описание: <textarea class="form-control" name="description" th:text="*{description}"></textarea> <br>
+        Цена: <input class="form-control" name="price" step="0.1" th:value="*{price}" type="number"/> <br>
+        Количество: <input class="form-control" name="amount" th:value="*{amount}" type="number"/> <br>
         <div class="form-group">
             <label for="imageForm">Изображение:</label>
             <input class="form-control-file" id="imageForm" name="image" type="file">
         </div>
+
         <button class="btn btn-success" type="submit">Добавить</button>
     </form>
 </div>
-
-
 </body>

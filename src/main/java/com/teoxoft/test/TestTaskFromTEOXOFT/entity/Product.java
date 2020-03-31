@@ -18,14 +18,6 @@ public class Product {
         this.productId = new ProductId();
     }
 
-    public ProductId getProductId() {
-        return productId;
-    }
-
-    public void setProductId(ProductId productId) {
-        this.productId = productId;
-    }
-
     public String getImage() {
         return image;
     }

@@ -62,18 +62,21 @@ public class CategoryController {
 
     @Secured("ROLE_ADMIN")
     @PostMapping("/categories")
-    public String addOrEditCategory(@RequestParam(value = "edit", required = false) String editableCategory,
+    public String addOrEditCategory(@RequestParam(value = "edit", defaultValue = "") String editableCategory,
                                     @ModelAttribute Category newCategory,
                                     BindingResult bindingResult) {
         if (!bindingResult.hasErrors()) {
-            if (categoryService.getCategoryByName(newCategory.getName()) != null) {
-                isDuplicateCategory = true;
-            } else {
-                if (editableCategory != null && !editableCategory.isEmpty()) {
-                    categoryService.updateCategoryName(newCategory.getName(), editableCategory);
+            if (!editableCategory.isEmpty()) {
+                if (!editableCategory.equals(newCategory.getName()) && categoryService.getCategoryByName(newCategory.getName()) != null) {
+                    isDuplicateCategory = true;
+                    return "redirect:/categories";
                 }
-                categoryService.addCategory(newCategory);
+                categoryService.updateCategoryName(newCategory.getName(), editableCategory);
+            } else if (categoryService.getCategoryByName(newCategory.getName()) != null) {
+                isDuplicateCategory = true;
+                return "redirect:/categories";
             }
+            categoryService.addCategory(newCategory);
         }
         return "redirect:/categories";
     }
