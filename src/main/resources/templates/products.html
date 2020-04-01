@@ -55,10 +55,11 @@
     <tr th:each="product : ${products}">
         <td th:text="${product.category}">product category</td>
         <td th:switch="${product.image != null}">
-            <img class="img-thumbnail"
-                 height="100" src=""
-                 th:case="true" th:src="${imagePrefix + product.image + '.jpg'}"
+
+            <img class="rounded" height="100"
+                 th:case="true" th:src="${imagePrefix} + ${product.image} + '.jpg'"
                  th:width="100"/>
+
             <p th:case="false">нет</p>
         </td>
         <td th:text="${product.name}">product name</td>

@@ -34,8 +34,8 @@ INSERT INTO warehouse.category(name, description) VALUES
 INSERT INTO warehouse.product(category, image, name, description, price, amount) VALUES 
        ('Куртки', NULL, 'Outventure', 'Предоставляет двойной покрой и максимальную защиту от холода.', 2000, 12),
 	   ('Куртки', NULL, 'Fila', NULL, 1300, 32),
-	   ('Куртки', NULL, 'Nike', NULL, 2500, 12),
-	   ('Куртки', NULL, 'Adidas', NULL, 600, 32),
+	   ('Куртки', 'КурткиNike', 'Nike', NULL, 2500, 12),
+	   ('Куртки', 'КурткиAdidas', 'Adidas', NULL, 600, 32),
 	   ('Куртки', NULL, 'Demix', NULL, 560, 1),
 	   ('Куртки', NULL, 'Reebok', NULL, 1000, 6),
 	   ('Куртки', NULL, 'Puma', NULL, 2000, 10),

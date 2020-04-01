@@ -3,7 +3,6 @@ package com.teoxoft.test.TestTaskFromTEOXOFT.controller;
 import com.teoxoft.test.TestTaskFromTEOXOFT.entity.Product;
 import com.teoxoft.test.TestTaskFromTEOXOFT.entity.User;
 import com.teoxoft.test.TestTaskFromTEOXOFT.service.ProductService;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -20,10 +19,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import static com.teoxoft.test.TestTaskFromTEOXOFT.entity.Role.USER;
 
@@ -32,7 +34,7 @@ public class ProductController {
     @Autowired
     private ProductService productService;
     @Value("${testTaskFromTEOXOFT.pathToImages}")
-    private String pathToImages;
+    private String imagesDir;
 
     @GetMapping("/products")
     public String products(ModelMap modelMap,
@@ -46,7 +48,7 @@ public class ProductController {
             products = productService.getAllProductsInCategoryAsPage(category, pageable);
         }
         modelMap.addAttribute("products", products);
-        modelMap.addAttribute("imagePrefix", pathToImages);
+        modelMap.addAttribute("imagePrefix", imagesDir);
         modelMap.addAttribute("categoryParameter", category);
         modelMap.addAttribute("currentPage", pageable.getPageNumber());
         modelMap.addAttribute("currentSort", sort);
@@ -77,7 +79,7 @@ public class ProductController {
     @PostMapping("/editProduct")
     public String addOrEditProduct(@ModelAttribute Product product,
                                    BindingResult bindingResult,
-                                   @RequestParam(value = "image", required = false) MultipartFile image) throws UnsupportedEncodingException {
+                                   @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) throws UnsupportedEncodingException {
         String[] categories = product.getCategory().split(",");
         String[] products = product.getName().split(",");
         String newCategory = categories[0];
@@ -96,6 +98,26 @@ public class ProductController {
                 && (!oldCategory.equals(newCategory) || !oldProduct.equals(newProduct))) {
             productService.updateCategoryAndNameOfProduct(newCategory, oldCategory, newProduct, oldProduct);
         }
+        try {
+            if (!imageFile.isEmpty()) {
+                if (!imageFile.getContentType().equals("image/jpeg")) {
+                    throw new RuntimeException("Разрешены только изображения формата JPG");
+                }
+                try {
+                    Path path = Paths.get("src/main/resources/static" + imagesDir + newCategory + newProduct + ".jpg");
+                    if (Files.notExists(path.getParent())) {
+                        Files.createDirectories(path.getParent());
+                    }
+                    Files.write(path, imageFile.getBytes(), StandardOpenOption.CREATE);
+                } catch (IOException e) {
+                    throw new RuntimeException("Невозможно сохранить изображение", e);
+                }
+                product.setImage(newCategory + newProduct);
+            }
+        } catch (RuntimeException e) {
+            bindingResult.reject(e.getMessage());
+            return "/editProduct";
+        }
         productService.addProduct(product);
         return "redirect:/products?category=" + URLEncoder.encode(newCategory, "UTF-8");
     }
@@ -106,20 +128,5 @@ public class ProductController {
                                 @RequestParam("category") String category) throws UnsupportedEncodingException {
         productService.removeProduct(productService.getProductByCategoryAndName(category, name));
         return "redirect:/products?category=" + URLEncoder.encode(category, "UTF-8");
-    }
-
-    private void validateImage(MultipartFile image) {
-        if (!image.getContentType().equals("image/jpeg")) {
-            throw new RuntimeException("Разрешены только изображения формата JPG");
-        }
-    }
-
-    private void saveImage(String filename, MultipartFile image) throws RuntimeException {
-        try {
-            File file = new File(pathToImages + filename);
-            FileUtils.writeByteArrayToFile(file, image.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException("Невозможно сохранить изображение", e);
-        }
     }
 }

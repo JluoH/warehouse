@@ -25,8 +25,10 @@
             <td th:if="${editableCategory} == ${category.getName()}">
                 <form method="post" th:object="${newCategory}">
                     <input class="form-control" name="name" th:value="${category.name}"/>
-                    Описание:<textarea class="form-control" name="description"
-                                       th:text="${category.description}"></textarea>
+                    Описание:
+                    <textarea class="form-control" name="description"
+                              th:text="${category.description}"></textarea>
+
                     <button class="btn btn-success" style="float:left" type="submit">Обновить</button>
                 </form>
             </td>
