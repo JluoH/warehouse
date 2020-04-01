@@ -12,7 +12,7 @@
     <form enctype="multipart/form-data" method="post" th:object="${product}">
         Категория:
         <select class="form-control" name="category">
-            <option th:text="*{category}"></option>
+            <option th:unless="${product.category} == null" th:text="*{category}"></option>
             <option th:each="categoryFromList : ${categoryList}"
                     th:text="${categoryFromList.getName()}"
                     th:unless="${product.category} == ${categoryFromList.getName()}"></option>
