@@ -2,6 +2,7 @@ package com.teoxoft.test.TestTaskFromTEOXOFT.controller;
 
 import com.teoxoft.test.TestTaskFromTEOXOFT.entity.Product;
 import com.teoxoft.test.TestTaskFromTEOXOFT.entity.User;
+import com.teoxoft.test.TestTaskFromTEOXOFT.service.CategoryService;
 import com.teoxoft.test.TestTaskFromTEOXOFT.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,8 @@ import static com.teoxoft.test.TestTaskFromTEOXOFT.entity.Role.USER;
 public class ProductController {
     @Autowired
     private ProductService productService;
+    @Autowired
+    private CategoryService categoryService;
     @Value("${testTaskFromTEOXOFT.pathToImages}")
     private String imagesDir;
 
@@ -60,7 +63,7 @@ public class ProductController {
 
     @Secured("ROLE_ADMIN")
     @GetMapping(value = "/editProduct", params = "edit")
-    public String editProduct(ModelMap modelMap,
+    public String addOrEditProduct(ModelMap modelMap,
                               @RequestParam(value = "name", defaultValue = "") String name,
                               @RequestParam(value = "category", defaultValue = "") String category) {
         if (category.isEmpty() && name.isEmpty()) {
@@ -72,6 +75,7 @@ public class ProductController {
         } else {
             modelMap.addAttribute("product", productService.getProductByCategoryAndName(category, name));
         }
+        modelMap.addAttribute("categoryList", categoryService.getAllCategories());
         return "editProduct";
     }
 
