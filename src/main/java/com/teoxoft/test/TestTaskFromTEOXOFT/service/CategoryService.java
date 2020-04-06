@@ -15,7 +15,6 @@ public class CategoryService {
     private ProductService productService;
 
     public void updateCategoryName(String newName, String oldName) {
-
         categoryRepository.updateCategoryName(newName, oldName);
     }
 
@@ -33,8 +32,9 @@ public class CategoryService {
                 category.setCountOfProducts(productService.getAmountOfProductsInCategory(category.getName())));
         return categoryList;
     }
+
     public Category getCategoryByName(String name) {
-        if (categoryRepository.findById(name).isEmpty()){
+        if (!categoryRepository.findById(name).isPresent()) {
             return null;
         }
         return categoryRepository.findById(name).get();

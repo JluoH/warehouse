@@ -23,10 +23,10 @@ public class UserService implements UserDetailsService {
 
     @PostConstruct
     public void setDefaultUsers() {
-        if (userRepository.findById("user").isEmpty()) {
+        if (!userRepository.findById("user").isPresent()) {
             this.saveUser(new User("user", "password", USER));
         }
-        if (userRepository.findById("admin").isEmpty()) {
+        if (!userRepository.findById("admin").isPresent()) {
             this.saveUser(new User("admin", "password", ADMIN));
         }
     }
